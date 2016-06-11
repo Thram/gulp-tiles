@@ -1,0 +1,31 @@
+{
+  "name": "gulp-tiles",
+  "version": "0.0.1",
+  "description": "Create tiles from image.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dashukin/gulp-tiles.git"
+  },
+  "keywords": [
+    "gulp",
+    "image",
+    "tiles"
+  ],
+  "author": "Vasili Molakhau",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dashukin/gulp-tiles/issues"
+  },
+  "homepage": "https://github.com/dashukin/gulp-tiles#readme",
+  "dependencies": {
+    "gulp-gm": "0.0.8",
+    "gulp-util": "^3.0.7",
+    "merge-stream": "^1.0.0",
+    "object-assign": "^4.1.0",
+    "through2": "^2.0.1"
+  }
+}
