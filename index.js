@@ -44,7 +44,7 @@ function createTiles (configuration) {
 					return callback(new PluginError(PLUGIN_NAME, error));
 				}
 
-				console.log(size);
+				//console.log(size);
 
 				var croppedFile;
 
