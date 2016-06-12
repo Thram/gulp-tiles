@@ -32,7 +32,7 @@ function createTiles (configuration) {
 
 	return through.obj(function (file, encoding, callback) {
 
-		var _args = arguments.slice();
+		var _args = Array.prototype.slice.call(arguments);
 
 		gulpGM(function (gmFile, gmCallback) {
 
