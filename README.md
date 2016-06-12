@@ -66,8 +66,8 @@ Desired tile height in px.
 #### options.format
 
 Type: `String`  
-Default value: Format of the input file  
-Possible values: `png`, `jpeg`.
+Default value: `jpg`  
+Possible values: `png`, `jpg`.
 
 Override the output format of the processed file.
 
