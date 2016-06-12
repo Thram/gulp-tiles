@@ -50,7 +50,7 @@ gulp.task('default', function () {
 #### options.width
 
 Type: `Number`  
-Default value: `256` (only if height is defined)
+Default value: `256` 
 
 Desired tile width in px.
 
@@ -58,7 +58,7 @@ Desired tile width in px.
 #### options.height
 
 Type: `Number`  
-Default value: `256` (only if width is defined)
+Default value: `256`
 
 Desired tile height in px.
 
