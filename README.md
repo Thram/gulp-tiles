@@ -37,7 +37,7 @@ gulp.task('default', function () {
     .pipe(createTiles({ 
       width: 512,
       height: 512,
-      foramt: 'jpg'
+      format: 'jpg'
     }))
     .pipe(gulp.dest('./images/tiles/'));
 });
