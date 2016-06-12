@@ -1,5 +1,5 @@
 /*
- * grunt-tiles
+ * gulp-tiles
  * https://github.com/dashukin/gulp-tiles
  *
  * Copyright (c) 2016 Vasili Molakhau
@@ -9,8 +9,9 @@
 var through 	= require('through2');
 var util 		= require('gulp-util');
 var assign		= require('object-assign');
-var gulpGM 		= require('gulp-gm');
-var mergeStream = require('merge-stream');
+var gm 			= require('gm');
+var path 		= require('path');
+var Promise		= require('promise');
 
 
 var PluginError = util.PluginError;
@@ -19,44 +20,242 @@ var PLUGIN_NAME = 'gulp-tiles';
 
 function createTiles (configuration) {
 
-	var baseOptions,
-		options;
+	'use strict';
 
-	baseOptions = {
+	var baseConfiguration,
+		baseValidationData,
+		pluginConfiguration;
+
+	baseConfiguration = {
 		width: 256,
 		height: 256,
 		format: 'jpg'
 	};
 
-	options = assign(baseOptions, configuration);
+	baseValidationData = {
+		isValid: true,
+		messages: []
+	};
+
+	/**
+	 * @name pluginConfiguration
+	 * @type {Object}
+	 */
+
+	pluginConfiguration = assign(baseConfiguration, configuration);
 
 	return through.obj(function (file, encoding, callback) {
 
-		var _args = Array.prototype.slice.call(arguments);
+		var self = this,
+			configurationValidation,
+			gmFile,
+			promises,
+			tilePromise;
 
-		gulpGM(function (gmFile, gmCallback) {
+		if (file.isNull()) {
+			return callback(null, file);
+		}
 
-			var mergedStream = mergeStream();
+		// TODO: check for Stream support
+		if (file.isStream()) {
+			return callback(new PluginError(PLUGIN_NAME, 'Streaming might not be supported.'));
+		}
 
-			gmFile.size(function (error, size) {
+		configurationValidation = validateConfiguration(pluginConfiguration);
 
-				if (error) {
-					return callback(new PluginError(PLUGIN_NAME, error));
+		if (!configurationValidation.isValid) {
+			return callback(new PluginError(PLUGIN_NAME, configurationValidation.messages.join(' ')));
+		}
+
+		promises = [];
+
+		gmFile = createGmFile(file);
+
+		gmFile.size(function (error, size) {
+
+			var tilesX,
+				tilesY,
+				xIndex,
+				yIndex;
+
+			if (error) {
+				return callback(error);
+			}
+
+			tilesX = Math.floor(size.width / pluginConfiguration.width);
+			tilesY = Math.floor(size.height / pluginConfiguration.height);
+
+			if (tilesX === 0 || tilesY === 0) {
+				return callback(new PluginError(PLUGIN_NAME, 'Original image does not contain desired size of tiles.'));
+			}
+
+			for (yIndex = 0; yIndex < tilesY; yIndex += 1) {
+				for (xIndex = 0; xIndex < tilesX; xIndex += 1) {
+
+					tilePromise = createTile(file, {
+						xIndex: xIndex,
+						yIndex: yIndex
+					}).catch(function (error) {
+						return callback(error);
+					});
+
+					promises.push(tilePromise);
+
 				}
+			}
 
-				//console.log(size);
+			Promise.all(promises).then(function () {
+				callback(null);
+			}).catch(function (error) {
+				callback(error);
+			});
 
-				var croppedFile;
+		});
 
-				croppedFile = gmFile.crop(options.width, options.height);
+		/**
+		 * Create tile.
+		 * @param file {Transform}
+		 * @param options {Object}
+		 * @param options.xIndex {Number} x index of created tile.
+		 * @param options.yIndex {Number} y index of created tile.
+		 * @returns {*}
+		 */
+		function createTile (file, options) {
 
-				mergedStream.add(croppedFile);
+			return new Promise(function (resolve, reject) {
 
-				callback(null, mergedStream);
+				var _file,
+					gmFile,
+					tileW,
+					tileH;
+
+				_file = file.clone({contents: false});
+
+				tileW = pluginConfiguration.width;
+				tileH = pluginConfiguration.height;
+
+				gmFile = createGmFile(file).crop(tileW, tileH, options.xIndex * tileW, options.yIndex * tileH);
+
+				gmFile.toBuffer(function (err, buffer) {
+
+					var filePath,
+						fileName;
+
+					if (err) {
+						reject(err);
+					}
+
+					_file.contents = buffer;
+
+					filePath = _file.path;
+
+					fileName = path.parse(filePath).name;
+
+					_file.path = filePath.replace(fileName, fileName + options.yIndex + '_' + options.xIndex);
+
+					self.push(_file);
+
+					resolve();
+
+				});
 
 			});
 
-		}).apply(null, _args);
+		}
+
+		/**
+		 * Create GraphicsMagick file.
+		 * @param file
+		 */
+		function createGmFile (file) {
+
+			var _file = file.clone({contents: false});
+
+			return gm(file.contents, file.path);
+
+		}
+
+		/**
+		 * Validate options passed to plugin.
+		 * @param options 			{Object} Plugin options.
+		 * @param options.width 	{Number} Output tile width.
+		 * @param options.height 	{Number} Output tile height.
+		 * @param options.format	{String} Output file format.
+		 * @returns 				{Object} Validation data.
+		 */
+		function validateConfiguration (options) {
+
+			var output,
+				widthValidation,
+				heightValidation,
+				formatValidation;
+
+			output = assign({}, baseValidationData);
+
+			options = options || {};
+
+			widthValidation = validateDimensionValue(options.width);
+			heightValidation = validateDimensionValue(options.height);
+			formatValidation = validateOutputFormat(options.format);
+
+			[widthValidation, heightValidation, formatValidation].forEach(function (data) {
+				if (data.isValid === false) {
+					output.isValid = false;
+					output.messages = output.messages.concat(data.messages);
+				}
+			});
+
+			return output;
+
+		}
+
+		/**
+		 * Validate dimension value.
+		 * @param value {Number} Dimension value.
+		 * @returns 	{Object} Validation data.
+		 */
+		function validateDimensionValue (value) {
+
+			var output = assign({}, baseValidationData);
+
+			if (typeof value !== 'number' || isNaN(value)) {
+				output.isValid = false;
+				output.messages.push('Dimension value should be a number.');
+			}
+
+			if (Math.floor(value) < 1) {
+				output.isValid = false;
+				output.messages.push('Dimension value should be greater than 1.');
+			}
+
+			return output;
+
+		}
+
+		/**
+		 * Validate output file format.
+		 * @param format 	{String} Output file format.
+		 * @returns 		{Object} Validation data.
+		 */
+		function validateOutputFormat (format) {
+
+			var output,
+				validFormats;
+
+			output = assign({}, baseValidationData);
+
+			validFormats = ['jpg', 'png'];
+
+			format = (format || '').replace(/^\s+/, '').replace(/\s+$/, '');
+
+			if (!format.length || !~validFormats.indexOf(format)) {
+				output.isValid = false;
+				output.messages.push('Invalid output format. Should be one of "' + validFormats.join(', ') + '".');
+			}
+
+			return output;
+
+		}
 
 	});
 
