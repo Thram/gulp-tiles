@@ -26,6 +26,14 @@ Windows & others:
 Confirm that ImageMagick is properly set up by executing `convert -help` in a terminal.
 
 
+## Install
+
+Install with [npm](https://npmjs.org/package/gulp-tiles)
+
+```
+npm install --save-dev gulp-tiles
+```
+
 ## Example
 
 ```js
