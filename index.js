@@ -136,10 +136,15 @@ function createTiles (configuration) {
 
 				gmFile = createGmFile(file).crop(tileW, tileH, options.xIndex * tileW, options.yIndex * tileH);
 
+				if (pluginConfiguration.format.length) {
+					gmFile = gmFile.setFormat(pluginConfiguration.format);
+				}
+
 				gmFile.toBuffer(function (err, buffer) {
 
 					var filePath,
-						fileName;
+						fileName,
+						fileExt;
 
 					if (err) {
 						reject(err);
@@ -151,7 +156,13 @@ function createTiles (configuration) {
 
 					fileName = path.parse(filePath).name;
 
-					_file.path = filePath.replace(fileName, fileName + options.yIndex + '_' + options.xIndex);
+					fileExt = path.parse(filePath).ext;
+
+					filePath = filePath.replace(fileName, fileName + options.yIndex + '_' + options.xIndex);
+
+					filePath = filePath.replace(fileExt, '.' + pluginConfiguration.format);
+
+					_file.path = filePath;
 
 					self.push(_file);
 
@@ -244,7 +255,7 @@ function createTiles (configuration) {
 
 			output = assign({}, baseValidationData);
 
-			validFormats = ['jpg', 'png'];
+			validFormats = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
 			format = (format || '').replace(/^\s+/, '').replace(/\s+$/, '');
 
