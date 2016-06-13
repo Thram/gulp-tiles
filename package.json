@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/dashukin/gulp-tiles#readme",
   "dependencies": {
-    "gulp-gm": "0.0.8",
+    "gm": "^1.22.0",
     "gulp-util": "^3.0.7",
     "object-assign": "^4.1.0",
     "promise": "^7.1.1",
