@@ -65,7 +65,7 @@ Desired tile width in px.
 
 #### options.height
 
-Type: `Number`
+Type: `Number`  
 Default value: `256`
 
 Desired tile height in px.
@@ -73,7 +73,7 @@ Desired tile height in px.
 
 #### options.format
 
-Type: `String`
+Type: `String`  
 Default value: `jpg`  
 Possible values: `jpg`, `jpeg`, `png`, `gif`, `bmp`.
 
@@ -82,7 +82,7 @@ Override the output format of the processed file.
 
 #### options.imageMagick
 
-Type: `Boolean`
+Type: `Boolean`  
 Default value: `false`
 
 Use ImageMagick instead of GraphicsMagick
