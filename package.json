@@ -1,6 +1,6 @@
 {
   "name": "gulp-tiles",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Create tiles from image.",
   "main": "index.js",
   "scripts": {
