@@ -80,5 +80,9 @@ Possible values: `jpg`, `jpeg`, `png`, `gif`, `bmp`.
 Override the output format of the processed file.
 
 
+#### options.imageMagick
 
+Type `Boolean`
+Default value: `false`
 
+Use ImageMagick instead of GraphicsMagick
