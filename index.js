@@ -29,7 +29,8 @@ function createTiles (configuration) {
 	baseConfiguration = {
 		width: 256,
 		height: 256,
-		format: 'jpg'
+		format: 'jpg',
+		imageMagick: false
 	};
 
 	baseValidationData = {
@@ -48,6 +49,7 @@ function createTiles (configuration) {
 
 		var self = this,
 			configurationValidation,
+			_gm,
 			gmFile,
 			promises,
 			tilePromise;
@@ -65,6 +67,14 @@ function createTiles (configuration) {
 
 		if (!configurationValidation.isValid) {
 			return callback(new PluginError(PLUGIN_NAME, configurationValidation.messages.join(' ')));
+		}
+
+		_gm = gm;
+
+		if (pluginConfiguration.imageMagick === true) {
+			_gm = gm.subClass({
+				imageMagick: true
+			});
 		}
 
 		promises = [];
@@ -182,7 +192,7 @@ function createTiles (configuration) {
 
 			var _file = file.clone({contents: false});
 
-			return gm(file.contents, file.path);
+			return _gm(file.contents, file.path);
 
 		}
 
