@@ -82,7 +82,7 @@ Override the output format of the processed file.
 
 #### options.imageMagick
 
-Type `Boolean`  
+Type: `Boolean` 
 Default value: `false`
 
 Use ImageMagick instead of GraphicsMagick
