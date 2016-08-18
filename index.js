@@ -192,7 +192,7 @@ function createTiles (configuration) {
 
 			var _file = file.clone({contents: false});
 
-			return _gm(file.contents, file.path).quality(100);
+			return _gm(file.contents, file.path).quality(pluginConfiguration.quality || 100);
 
 		}
 
