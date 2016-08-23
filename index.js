@@ -92,8 +92,8 @@ function createTiles (configuration) {
 				return callback(error);
 			}
 
-			tilesX = Math.floor(size.width / pluginConfiguration.width);
-			tilesY = Math.floor(size.height / pluginConfiguration.height);
+			tilesX = Math.ceil(size.width / pluginConfiguration.width);
+			tilesY = Math.ceil(size.height / pluginConfiguration.height);
 
 			if (tilesX === 0 || tilesY === 0) {
 				return callback(new PluginError(PLUGIN_NAME, 'Original image does not contain desired size of tiles.'));
